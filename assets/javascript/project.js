@@ -1,10 +1,11 @@
-var butions = [];
+var moviePosters = [];
 
-function poster() {
-    var movie = ("batman");
-    // var movie = $(this).attr("data-movie");
+console.log(moviePosters);
+
+function moviePoster(index) {
+    var movie = moviePosters[index];
+    console.log(movie);
     var movieURL = "https://www.omdbapi.com/?t=" + movie + "&y=&plot=short&apikey=trilogy";
-
     $.ajax({
         url: movieURL,
         method: "GET"
@@ -18,72 +19,56 @@ function poster() {
         console.log(randomGenre);
         movieImage.attr(
             {
-                
-                "data-genre": response.Genre,
+                "data-music": randomGenre,
                 "class": "moviePoster",
                 "src": response.Poster
-
             }
         )
         movieDiv.append(movieImage);
-        $("#gifs").append(movieDiv);
+        $("#poster").append(movieDiv);
     });
 }
-// poster();
 
 // var musicUrl = "https://accounts.spotify.com/authorize/?"
 // window.location = musicUrl + "client_id=80f8fbcd74a24b8ea1d6aab4c74ead38&response_type=token&redirect_uri=https://egretsch.github.io/project1/"
-var token = "BQDjSIxgWwU6q2-gSHpftqtkXodcPyIEusURz_avrb9Q9Nw9F7-Qxdrg9hlSwCLvqR6Olx1RLqgrAiFzcK9NXN6-G5jXfRXaOp5_CQIkhBEVealmhN7iAtyibrUpGCtPWzKf-ao9VfA";
 
-$.ajax({
-    url: 'https://api.spotify.com/v1/search?q=action&type=playlist',
+$(document).on("click", ".moviePoster", function () {
+    console.log("You got music");
+    $('#player').empty();
+    var token = "BQBif1bVmlSvX1U6p58-QevSFdnj-RAUjGqu1CRZW575HxG6EWPKQG_OYUM0w0A-6A_GWrkTczgy6fMuMjD46CMuEcQ3horyzD8-bvypLSZfYJtGU8BymMec17xoxrj80O8GFkvroQE";
+    var musicG = $(this).attr("data-music");
+    var musicUrl = 'https://api.spotify.com/v1/search?q=' + musicG + '&type=playlist'
+   $.ajax({
+    url: musicUrl,
     method: 'GET',
     headers: {
         'Authorization': 'Bearer ' + token
-    },
-    success: function (data) {
-        console.log(data);
+    },      
+    success: function (playlist) {
+        console.log(playlist);
+        var randomMusic = playlist.playlists.items[Math.floor(Math.random() * playlist.playlists.items.length)].uri;
+        console.log(randomMusic);
+        var musicDiv = $("<div>");
+        var musicIframe = $('<iframe src="https://open.spotify.com/embed?uri=' + randomMusic + '" width="300" height="300" frameborder="0" allowtransparency="true" allow="encrypted-media">' + '</iframe>');
+        
+        $("#player").append(musicDiv);
+        musicDiv.append(musicIframe);
     },
     error: function () {
         console.log("It failed");
     }
+    }); 
 });
-// $(document).on("click", ".gifty2", function () {
-
-//     console.log($(this))
-
-//     var state = $(this).attr("data-state");
-
-//     if (state === "still") {
-//         $(this).attr("src", $(this).attr("data-animate"));
-//         $(this).attr("data-state", "animate");
-//     } else {
-//         $(this).attr("src", $(this).attr("data-still"));
-//         $(this).attr("data-state", "still");
-//     }
-// });
-
-// function renderButtons() {
-//     $("#buttons").empty();
-//     for (var i = 0; i < butions.length; i++) {
-//         var a = $("<button>");
-//         a.addClass("gifty");
-//         a.attr("data-name", butions[i]);
-//         a.text(butions[i]);
-//         $("#buttons").append(a);
-//     }
-// }
-
-// $("#add-button").on("click", function (event) {
-//     event.preventDefault();
-//     $("#button-input").empty();
-//     var button2 = $("#button-input").val().trim();
-//     butions.push(button2);
-//     renderButtons();
-
-// });
-
-// $(document).on("click", ".gifty", topic);
 
 
-// renderButtons();
+$("#add-button").on("click", function (event) {
+    event.preventDefault();
+    console.log("I'm a button");
+    var button2 = $("#button-input").val().trim();
+    moviePosters.push(button2);
+    $("#poster").empty();
+    for (var i = 0; i < moviePosters.length; i++) {
+        moviePoster(i);
+    }
+    $("#button-input").val(" ");
+});
