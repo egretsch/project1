@@ -1,386 +1,376 @@
-
-
-$(document).ready(function () {
-    $('.carousel').carousel();
-
-    // // moves to the previous and next movies //
-    
-    // instance.next();
-    // instance.next(3);
-
-    // instance.prev();
-    // instance.prev(3);
-
-    // Cache references to DOM elements.
-var elms = ['track', 'timer', 'duration', 'playBtn', 'pauseBtn', 'prevBtn', 'nextBtn', 'playlistBtn', 'volumeBtn', 'progress', 'bar', 'wave', 'loading', 'playlist', 'list', 'volume', 'barEmpty', 'barFull', 'sliderBtn'];
-elms.forEach(function(elm) {
-  window[elm] = document.getElementById(elm);
-});
-
-/**
- * Player class containing the state of our playlist and where we are in it.
- * Includes all methods for playing, skipping, updating the display, etc.
- * @param {Array} playlist Array of objects with playlist song details ({title, file, howl}).
+/*!
+ * Materialize v1.0.0-beta (http://materializecss.com)
+ * Copyright 2014-2017 Materialize
+ * MIT License (https://raw.githubusercontent.com/Dogfalo/materialize/master/LICENSE)
  */
-var Player = function(playlist) {
-  this.playlist = playlist;
-  this.index = 0;
-
-  // Display the title of the first track.
-  track.innerHTML = '1. ' + playlist[0].title;
-
-  // Setup the playlist display.
-  playlist.forEach(function(song) {
-    var div = document.createElement('div');
-    div.className = 'list-song';
-    div.innerHTML = song.title;
-    div.onclick = function() {
-      player.skipTo(playlist.indexOf(song));
-    };
-    list.appendChild(div);
-  });
-};
-Player.prototype = {
-  /**
-   * Play a song in the playlist.
-   * @param  {Number} index Index of the song in the playlist (leave empty to play the first or current).
-   */
-  play: function(index) {
-    var self = this;
-    var sound;
-
-    index = typeof index === 'number' ? index : self.index;
-    var data = self.playlist[index];
-
-    // If we already loaded this track, use the current one.
-    // Otherwise, setup and load a new Howl.
-    if (data.howl) {
-      sound = data.howl;
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+/*! cash-dom 1.3.5, https://github.com/kenwheeler/cash @license MIT */
+(function (factory) {
+  window.cash = factory();
+})(function () {
+  var doc = document,
+      win = window,
+      ArrayProto = Array.prototype,
+      slice = ArrayProto.slice,
+      filter = ArrayProto.filter,
+      push = ArrayProto.push;
+  var noop = function () {},
+      isFunction = function (item) {
+    // @see https://crbug.com/568448
+    return typeof item === typeof noop && item.call;
+  },
+      isString = function (item) {
+    return typeof item === typeof "";
+  };
+  var idMatch = /^#[\w-]*$/,
+      classMatch = /^\.[\w-]*$/,
+      htmlMatch = /<.+>/,
+      singlet = /^\w+$/;
+  function find(selector, context) {
+    context = context || doc;
+    var elems = classMatch.test(selector) ? context.getElementsByClassName(selector.slice(1)) : singlet.test(selector) ? context.getElementsByTagName(selector) : context.querySelectorAll(selector);
+    return elems;
+  }
+  var frag;
+  function parseHTML(str) {
+    if (!frag) {
+      frag = doc.implementation.createHTMLDocument(null);
+      var base = frag.createElement("base");
+      base.href = doc.location.href;
+      frag.head.appendChild(base);
+    }
+    frag.body.innerHTML = str;
+    return frag.body.childNodes;
+  }
+  function onReady(fn) {
+    if (doc.readyState !== "loading") {
+      fn();
     } else {
-      sound = data.howl = new Howl({
-        src: ['./audio/' + data.file + '.webm', './audio/' + data.file + '.mp3'],
-        html5: true, // Force to HTML5 so that the audio can stream in (best for large files).
-        onplay: function() {
-          // Display the duration.
-          duration.innerHTML = self.formatTime(Math.round(sound.duration()));
-
-          // Start upating the progress of the track.
-          requestAnimationFrame(self.step.bind(self));
-
-          // Start the wave animation if we have already loaded
-          wave.container.style.display = 'block';
-          bar.style.display = 'none';
-          pauseBtn.style.display = 'block';
-        },
-        onload: function() {
-          // Start the wave animation.
-          wave.container.style.display = 'block';
-          bar.style.display = 'none';
-          loading.style.display = 'none';
-        },
-        onend: function() {
-          // Stop the wave animation.
-          wave.container.style.display = 'none';
-          bar.style.display = 'block';
-          self.skip('right');
-        },
-        onpause: function() {
-          // Stop the wave animation.
-          wave.container.style.display = 'none';
-          bar.style.display = 'block';
-        },
-        onstop: function() {
-          // Stop the wave animation.
-          wave.container.style.display = 'none';
-          bar.style.display = 'block';
+      doc.addEventListener("DOMContentLoaded", fn);
+    }
+  }
+  function Init(selector, context) {
+    if (!selector) {
+      return this;
+    }
+    // If already a cash collection, don't do any further processing
+    if (selector.cash && selector !== win) {
+      return selector;
+    }
+    var elems = selector,
+        i = 0,
+        length;
+    if (isString(selector)) {
+      elems = idMatch.test(selector) ?
+      // If an ID use the faster getElementById check
+      doc.getElementById(selector.slice(1)) : htmlMatch.test(selector) ?
+      // If HTML, parse it into real elements
+      parseHTML(selector) :
+      // else use `find`
+      find(selector, context);
+      // If function, use as shortcut for DOM ready
+    } else if (isFunction(selector)) {
+      onReady(selector);return this;
+    }
+    if (!elems) {
+      return this;
+    }
+    // If a single DOM element is passed in or received via ID, return the single element
+    if (elems.nodeType || elems === win) {
+      this[0] = elems;
+      this.length = 1;
+    } else {
+      // Treat like an array and loop through each item.
+      length = this.length = elems.length;
+      for (; i < length; i++) {
+        this[i] = elems[i];
+      }
+    }
+    return this;
+  }
+  function cash(selector, context) {
+    return new Init(selector, context);
+  }
+  var fn = cash.fn = cash.prototype = Init.prototype = { // jshint ignore:line
+    cash: true,
+    length: 0,
+    push: push,
+    splice: ArrayProto.splice,
+    map: ArrayProto.map,
+    init: Init
+  };
+  Object.defineProperty(fn, "constructor", { value: cash });
+  cash.parseHTML = parseHTML;
+  cash.noop = noop;
+  cash.isFunction = isFunction;
+  cash.isString = isString;
+  cash.extend = fn.extend = function (target) {
+    target = target || {};
+    var args = slice.call(arguments),
+        length = args.length,
+        i = 1;
+    if (args.length === 1) {
+      target = this;
+      i = 0;
+    }
+    for (; i < length; i++) {
+      if (!args[i]) {
+        continue;
+      }
+      for (var key in args[i]) {
+        if (args[i].hasOwnProperty(key)) {
+          target[key] = args[i][key];
         }
+      }
+    }
+    return target;
+  };
+  function each(collection, callback) {
+    var l = collection.length,
+        i = 0;
+    for (; i < l; i++) {
+      if (callback.call(collection[i], collection[i], i, collection) === false) {
+        break;
+      }
+    }
+  }
+  function matches(el, selector) {
+    var m = el && (el.matches || el.webkitMatchesSelector || el.mozMatchesSelector || el.msMatchesSelector || el.oMatchesSelector);
+    return !!m && m.call(el, selector);
+  }
+  function getCompareFunction(selector) {
+    return (
+      /* Use browser's `matches` function if string */
+      isString(selector) ? matches :
+      /* Match a cash element */
+      selector.cash ? function (el) {
+        return selector.is(el);
+      } :
+      /* Direct comparison */
+      function (el, selector) {
+        return el === selector;
+      }
+    );
+  }
+  function unique(collection) {
+    return cash(slice.call(collection).filter(function (item, index, self) {
+      return self.indexOf(item) === index;
+    }));
+  }
+  cash.extend({
+    merge: function (first, second) {
+      var len = +second.length,
+          i = first.length,
+          j = 0;
+      for (; j < len; i++, j++) {
+        first[i] = second[j];
+      }
+      first.length = i;
+      return first;
+    },
+    each: each,
+    matches: matches,
+    unique: unique,
+    isArray: Array.isArray,
+    isNumeric: function (n) {
+      return !isNaN(parseFloat(n)) && isFinite(n);
+    }
+  });
+  var uid = cash.uid = "_cash" + Date.now();
+  function getDataCache(node) {
+    return node[uid] = node[uid] || {};
+  }
+  function setData(node, key, value) {
+    return getDataCache(node)[key] = value;
+  }
+  function getData(node, key) {
+    var c = getDataCache(node);
+    if (c[key] === undefined) {
+      c[key] = node.dataset ? node.dataset[key] : cash(node).attr("data-" + key);
+    }
+    return c[key];
+  }
+  function removeData(node, key) {
+    var c = getDataCache(node);
+    if (c) {
+      delete c[key];
+    } else if (node.dataset) {
+      delete node.dataset[key];
+    } else {
+      cash(node).removeAttr("data-" + name);
+    }
+  }
+  fn.extend({
+    data: function (name, value) {
+      if (isString(name)) {
+        return value === undefined ? getData(this[0], name) : this.each(function (v) {
+          return setData(v, name, value);
+        });
+      }
+      for (var key in name) {
+        this.data(key, name[key]);
+      }
+      return this;
+    },
+    removeData: function (key) {
+      return this.each(function (v) {
+        return removeData(v, key);
       });
     }
-
-    // Begin playing the sound.
-    sound.play();
-
-    // Update the track display.
-    track.innerHTML = (index + 1) + '. ' + data.title;
-
-    // Show the pause button.
-    if (sound.state() === 'loaded') {
-      playBtn.style.display = 'none';
-      pauseBtn.style.display = 'block';
+  });
+  var notWhiteMatch = /\S+/g;
+  function getClasses(c) {
+    return isString(c) && c.match(notWhiteMatch);
+  }
+  function hasClass(v, c) {
+    return v.classList ? v.classList.contains(c) : new RegExp("(^| )" + c + "( |$)", "gi").test(v.className);
+  }
+  function addClass(v, c, spacedName) {
+    if (v.classList) {
+      v.classList.add(c);
+    } else if (spacedName.indexOf(" " + c + " ")) {
+      v.className += " " + c;
+    }
+  }
+  function removeClass(v, c) {
+    if (v.classList) {
+      v.classList.remove(c);
     } else {
-      loading.style.display = 'block';
-      playBtn.style.display = 'none';
-      pauseBtn.style.display = 'none';
+      v.className = v.className.replace(c, "");
     }
-
-    // Keep track of the index we are currently playing.
-    self.index = index;
-  },
-
-  /**
-   * Pause the currently playing track.
-   */
-  pause: function() {
-    var self = this;
-
-    // Get the Howl we want to manipulate.
-    var sound = self.playlist[self.index].howl;
-
-    // Puase the sound.
-    sound.pause();
-
-    // Show the play button.
-    playBtn.style.display = 'block';
-    pauseBtn.style.display = 'none';
-  },
-
-  /**
-   * Skip to the next or previous track.
-   * @param  {String} direction 'next' or 'prev'.
-   */
-  skip: function(direction) {
-    var self = this;
-
-    // Get the next track based on the direction of the track.
-    var index = 0;
-    if (direction === 'prev') {
-      index = self.index - 1;
-      if (index < 0) {
-        index = self.playlist.length - 1;
+  }
+  fn.extend({
+    addClass: function (c) {
+      var classes = getClasses(c);
+      return classes ? this.each(function (v) {
+        var spacedName = " " + v.className + " ";
+        each(classes, function (c) {
+          addClass(v, c, spacedName);
+        });
+      }) : this;
+    },
+    attr: function (name, value) {
+      if (!name) {
+        return undefined;
       }
-    } else {
-      index = self.index + 1;
-      if (index >= self.playlist.length) {
-        index = 0;
+      if (isString(name)) {
+        if (value === undefined) {
+          return this[0] ? this[0].getAttribute ? this[0].getAttribute(name) : this[0][name] : undefined;
+        }
+        return this.each(function (v) {
+          if (v.setAttribute) {
+            v.setAttribute(name, value);
+          } else {
+            v[name] = value;
+          }
+        });
       }
-    }
-
-    self.skipTo(index);
-  },
-
-  /**
-   * Skip to a specific track based on its playlist index.
-   * @param  {Number} index Index in the playlist.
-   */
-  skipTo: function(index) {
-    var self = this;
-
-    // Stop the current track.
-    if (self.playlist[self.index].howl) {
-      self.playlist[self.index].howl.stop();
-    }
-
-    // Reset progress.
-    progress.style.width = '0%';
-
-    // Play the new track.
-    self.play(index);
-  },
-
-  /**
-   * Set the volume and update the volume slider display.
-   * @param  {Number} val Volume between 0 and 1.
-   */
-  volume: function(val) {
-    var self = this;
-
-    // Update the global volume (affecting all Howls).
-    Howler.volume(val);
-
-    // Update the display on the slider.
-    var barWidth = (val * 90) / 100;
-    barFull.style.width = (barWidth * 100) + '%';
-    sliderBtn.style.left = (window.innerWidth * barWidth + window.innerWidth * 0.05 - 25) + 'px';
-  },
-
-  /**
-   * Seek to a new position in the currently playing track.
-   * @param  {Number} per Percentage through the song to skip.
-   */
-  seek: function(per) {
-    var self = this;
-
-    // Get the Howl we want to manipulate.
-    var sound = self.playlist[self.index].howl;
-
-    // Convert the percent into a seek position.
-    if (sound.playing()) {
-      sound.seek(sound.duration() * per);
-    }
-  },
-
-  /**
-   * The step called within requestAnimationFrame to update the playback position.
-   */
-  step: function() {
-    var self = this;
-
-    // Get the Howl we want to manipulate.
-    var sound = self.playlist[self.index].howl;
-
-    // Determine our current seek position.
-    var seek = sound.seek() || 0;
-    timer.innerHTML = self.formatTime(Math.round(seek));
-    progress.style.width = (((seek / sound.duration()) * 100) || 0) + '%';
-
-    // If the sound is still playing, continue stepping.
-    if (sound.playing()) {
-      requestAnimationFrame(self.step.bind(self));
-    }
-  },
-
-  /**
-   * Toggle the playlist display on/off.
-   */
-  togglePlaylist: function() {
-    var self = this;
-    var display = (playlist.style.display === 'block') ? 'none' : 'block';
-
-    setTimeout(function() {
-      playlist.style.display = display;
-    }, (display === 'block') ? 0 : 500);
-    playlist.className = (display === 'block') ? 'fadein' : 'fadeout';
-  },
-
-  /**
-   * Toggle the volume display on/off.
-   */
-  toggleVolume: function() {
-    var self = this;
-    var display = (volume.style.display === 'block') ? 'none' : 'block';
-
-    setTimeout(function() {
-      volume.style.display = display;
-    }, (display === 'block') ? 0 : 500);
-    volume.className = (display === 'block') ? 'fadein' : 'fadeout';
-  },
-
-  /**
-   * Format the time from seconds to M:SS.
-   * @param  {Number} secs Seconds to format.
-   * @return {String}      Formatted time.
-   */
-  formatTime: function(secs) {
-    var minutes = Math.floor(secs / 60) || 0;
-    var seconds = (secs - minutes * 60) || 0;
-
-    return minutes + ':' + (seconds < 10 ? '0' : '') + seconds;
-  }
-};
-
-// Setup our new audio player class and pass it the playlist.
-var player = new Player([
-  {
-    title: 'Rave Digger',
-    file: 'rave_digger',
-    howl: null
-  },
-  {
-    title: '80s Vibe',
-    file: '80s_vibe',
-    howl: null
-  },
-  {
-    title: 'Running Out',
-    file: 'running_out',
-    howl: null
-  }
-]);
-
-// Bind our player controls.
-playBtn.addEventListener('click', function() {
-  player.play();
-});
-pauseBtn.addEventListener('click', function() {
-  player.pause();
-});
-prevBtn.addEventListener('click', function() {
-  player.skip('prev');
-});
-nextBtn.addEventListener('click', function() {
-  player.skip('next');
-});
-waveform.addEventListener('click', function(event) {
-  player.seek(event.clientX / window.innerWidth);
-});
-playlistBtn.addEventListener('click', function() {
-  player.togglePlaylist();
-});
-playlist.addEventListener('click', function() {
-  player.togglePlaylist();
-});
-volumeBtn.addEventListener('click', function() {
-  player.toggleVolume();
-});
-volume.addEventListener('click', function() {
-  player.toggleVolume();
-});
-
-// Setup the event listeners to enable dragging of volume slider.
-barEmpty.addEventListener('click', function(event) {
-  var per = event.layerX / parseFloat(barEmpty.scrollWidth);
-  player.volume(per);
-});
-sliderBtn.addEventListener('mousedown', function() {
-  window.sliderDown = true;
-});
-sliderBtn.addEventListener('touchstart', function() {
-  window.sliderDown = true;
-});
-volume.addEventListener('mouseup', function() {
-  window.sliderDown = false;
-});
-volume.addEventListener('touchend', function() {
-  window.sliderDown = false;
-});
-
-var move = function(event) {
-  if (window.sliderDown) {
-    var x = event.clientX || event.touches[0].clientX;
-    var startX = window.innerWidth * 0.05;
-    var layerX = x - startX;
-    var per = Math.min(1, Math.max(0, layerX / parseFloat(barEmpty.scrollWidth)));
-    player.volume(per);
-  }
-};
-
-volume.addEventListener('mousemove', move);
-volume.addEventListener('touchmove', move);
-
-// Setup the "waveform" animation.
-var wave = new SiriWave({
-  container: waveform,
-  width: window.innerWidth,
-  height: window.innerHeight * 0.3,
-  cover: true,
-  speed: 0.03,
-  amplitude: 0.7,
-  frequency: 2
-});
-wave.start();
-
-// Update the height of the wave animation.
-// These are basically some hacks to get SiriWave.js to do what we want.
-var resize = function() {
-  var height = window.innerHeight * 0.3;
-  var width = window.innerWidth;
-  wave.height = height;
-  wave.height_2 = height / 2;
-  wave.MAX = wave.height_2 - 4;
-  wave.width = width;
-  wave.width_2 = width / 2;
-  wave.width_4 = width / 4;
-  wave.canvas.height = height;
-  wave.canvas.width = width;
-  wave.container.style.margin = -(height / 2) + 'px auto';
-
-  // Update the position of the slider.
-  var sound = player.playlist[player.index].howl;
-  if (sound) {
-    var vol = sound.volume();
-    var barWidth = (vol * 0.9);
-    sliderBtn.style.left = (window.innerWidth * barWidth + window.innerWidth * 0.05 - 25) + 'px';
-  }
-};
-window.addEventListener('resize', resize);
-resize();
+      for (var key in name) {
+        this.attr(key, name[key]);
+      }
+      return this;
+    },
+    hasClass: function (c) {
+      var check = false,
+          classes = getClasses(c);
+      if (classes && classes.length) {
+        this.each(function (v) {
+          check = hasClass(v, classes[0]);
+          return !check;
+        });
+      }
+      return check;
+    },
+    prop: function (name, value) {
+      if (isString(name)) {
+        return value === undefined ? this[0][name] : this.each(function (v) {
+          v[name] = value;
+        });
+      }
+      for (var key in name) {
+        this.prop(key, name[key]);
+      }
+      return this;
+    },
+    removeAttr: function (name) {
+      return this.each(function (v) {
+        if (v.removeAttribute) {
+          v.removeAttribute(name);
+        } else {
+          delete v[name];
+        }
+      });
+    },
+    removeClass: function (c) {
+      if (!arguments.length) {
+        return this.attr("class", "");
+      }
+      var classes = getClasses(c);
+      return classes ? this.each(function (v) {
+        each(classes, function (c) {
+          removeClass(v, c);
+        });
+      }) : this;
+    },
+    removeProp: function (name) {
+      return this.each(function (v) {
+        delete v[name];
+      });
+    },
+    toggleClass: function (c, state) {
+      if (state !== undefined) {
+        return this[state ? "addClass" : "removeClass"](c);
+      }
+      var classes = getClasses(c);
+      return classes ? this.each(function (v) {
+        var spacedName = " " + v.className + " ";
+        each(classes, function (c) {
+          if (hasClass(v, c)) {
+            removeClass(v, c);
+          } else {
+            addClass(v, c, spacedName);
+          }
+        });
+      }) : this;
+    } });
+  fn.extend({
+    add: function (selector, context) {
+      return unique(cash.merge(this, cash(selector, context)));
+    },
+    each: function (callback) {
+      each(this, callback);
+      return this;
+    },
+    eq: function (index) {
+      return cash(this.get(index));
+    },
+    filter: function (selector) {
+      if (!selector) {
+        return this;
+      }
+      var comparator = isFunction(selector) ? selector : getCompareFunction(selector);
+      return cash(filter.call(this, function (e) {
+        return comparator(e, selector);
+      }));
+    },
+    first: function () {
+      return this.eq(0);
+    },
+    get: function (index) {
+      if (index === undefined) {
+        return slice.call(this);
+      }
+      return index < 0 ? this[index + this.length] : this[index];
+    },
+    index: function (elem) {
+      var child = elem ? cash(elem)[0] : this[0],
+          collection = elem ? this : cash(child).parent().children();
+      return slice.call(collection).indexOf(child);
+    },
+    last: function () {
+      return this.eq(-1);
+    }})})
