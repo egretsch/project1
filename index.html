@@ -11,7 +11,7 @@
     <!--Let browser know website is optimized for mobile-->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </head>
-<<<<<<< HEAD
+
 <body>
     <div id="title">
         <div class="col s12 m10" id="card">
@@ -23,7 +23,7 @@
                         <form class="col s12">
                             <div class="input-field col s8">
                                 <input id="search" type="search" class="validate">
-                                <a class="waves-effect waves-light btn" class="button" class="ripple" href="#">Search</a>
+                                <a class="waves-effect waves-light btn" id="sudMovie" class="button" class="ripple" href="#">Search</a>
                                 <!-- <button input="text" type="button" onclick="poster()">Search</button> -->
                             </div>
                         </form>
@@ -36,10 +36,9 @@
     <br>
     <div id="funStuff">
         <div id="carousel col s6 offset-s6" class="carousel carousel-slider"></div>
-        <iframe src="https://open.spotify.com/embed?uri=spotify:album:1DFixLWuPkv3KT3TnV35m3" width="300" height="380" frameborder="0"
-            allowtransparency="true" allow="encrypted-media"></iframe>
+        <div id="player"></div>
     </div>
-    <div id="spotify" class="z-depth-0">
+    <div id="player" class="z-depth-0">
         <p class="z-depth-0"></p>
     </div>
     <!--JavaScript at end of body for optimized loading-->
