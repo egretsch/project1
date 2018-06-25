@@ -1,4 +1,35 @@
 var moviePosters = [];
+// Get the hash of the url
+const hash = window.location.hash
+    .substring(1)
+    .split('&')
+    .reduce(function (initial, item) {
+        if (item) {
+            var parts = item.split('=');
+            initial[parts[0]] = decodeURIComponent(parts[1]);
+        }
+        return initial;
+    }, {});
+window.location.hash = '';
+
+// Set token
+let _token = hash.access_token;
+
+const authEndpoint = 'https://accounts.spotify.com/authorize';
+
+// Replace with your app's client ID, redirect URI and desired scopes
+const clientId = '80f8fbcd74a24b8ea1d6aab4c74ead38';
+const redirectUri = 'https://egretsch.github.io/project1/';
+const scopes = [
+    'user-top-read'
+];
+// &scope=${scopes.join('%20')}&show_dialog=true
+// If there is no token, redirect to Spotify authorization
+if (!_token) {
+    window.location = `${authEndpoint}?client_id=${clientId}&response_type=token&redirect_uri=${redirectUri}`;
+}
+// var musicUrl = "https://accounts.spotify.com/authorize/?"
+// window.location = musicUrl + "client_id=80f8fbcd74a24b8ea1d6aab4c74ead38&response_type=token&redirect_uri=https://egretsch.github.io/project1/"
 
 //console.log(moviePosters);
 var config = {
@@ -45,7 +76,7 @@ function moviePoster(index, movieFromDb) {
             slider.append(movieDiv);
             $(".carousel").append(movieDiv);
         });
-        
+
     }
     // this is now used with firebase:
     else {
@@ -80,13 +111,12 @@ function moviePoster(index, movieFromDb) {
 }
 
 
-// var musicUrl = "https://accounts.spotify.com/authorize/?"
-// window.location = musicUrl + "client_id=80f8fbcd74a24b8ea1d6aab4c74ead38&response_type=token&redirect_uri=https://egretsch.github.io/project1/"
+
 
 $(document).on("click", ".moviePoster", function () {
     //console.log("You got music");
     $('#player').empty();
-    var token = "BQClvjrs7FsubmLhY9vXKfLCGfagcUaCugwgQqPTiWjZyXzrs86DJ1xYLdeU6XSDjTHkJe_J9FUdG7QLj1Tc8UR6gHs6J9U90K1TY767UVWmlpbnOHkH-G1J-n8OVoc008uwyhu33Qk";
+    var token = _token;
     var musicG = $(this).attr("data-music");
     var musicUrl = 'https://api.spotify.com/v1/search?q=' + musicG + '&type=playlist'
     $.ajax({
@@ -110,7 +140,6 @@ $(document).on("click", ".moviePoster", function () {
     });
 });
 
-
 $("#sudMovie").on("click", function (event) {
     event.preventDefault();
     //console.log("I'm a button");
@@ -125,7 +154,6 @@ $("#sudMovie").on("click", function (event) {
     }
     database.ref().push(movieObj);
 
-
     // Not needed because of firebase:
     // $("#poster").empty();
     // for (var i = 0; i < moviePosters.length; i++) {
@@ -134,11 +162,7 @@ $("#sudMovie").on("click", function (event) {
     $("#search").val(" ");
 });
 
-
 // Runs like a for loop:
 database.ref().on("child_added", function (snapShot) {
-
     moviePoster(-1, snapShot.val().movieFromDb);
-
 })
-//$('.carousel').carousel();
