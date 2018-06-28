@@ -1,4 +1,5 @@
 var moviePosters = [];
+var movieArray = [];
 // Get the hash of the url
 const hash = window.location.hash
     .substring(1)
@@ -23,8 +24,7 @@ const redirectUri = 'https://egretsch.github.io/project1/';
 const scopes = [
     'user-top-read'
 ];
-
-// // If there is no token, redirect to Spotify authorization
+// If there is no token, redirect to Spotify authorization
 // if (!_token) {
 //     window.location = `${authEndpoint}?client_id=${clientId}&response_type=token&redirect_uri=${redirectUri}`;
 // }
@@ -42,7 +42,6 @@ firebase.initializeApp(config);
 var database = firebase.database();
 
 function moviePoster(index, movieFromDb) {
-    //var slider;
     // this is here because of the old implementation using the moviePosters array, not needed anymore with firebase update:
     if (index > 0) {
         var movie = moviePosters[index];
@@ -51,6 +50,7 @@ function moviePoster(index, movieFromDb) {
             url: movieURL,
             method: "GET"
         }).then(function (response) {
+            console.log("inside else movie poster")
             var genreArray = response.Genre.split(",");
             var randomGenre = genreArray[Math.floor(Math.random() * genreArray.length)];
             var movieDiv = $("<a>").addClass("carousel-item");
@@ -75,6 +75,7 @@ function moviePoster(index, movieFromDb) {
             url: movieURL,
             method: "GET"
         }).then(function (response) {
+            console.log("inside else movie poster")
             var genreArray = response.Genre.split(",");
             var randomGenre = genreArray[Math.floor(Math.random() * genreArray.length)];
             var movieDiv = $("<a>").addClass("carousel-item");
@@ -112,7 +113,6 @@ $(document).on("click", ".moviePoster", function () {
             musicDiv.append(musicIframe);
         },
         error: function () {
-            console.log("It failed");
         }
     });
 });
@@ -121,18 +121,38 @@ $("#sudMovie").on("click", function (event) {
     event.preventDefault();
     var button2 = $("#search").val().trim();
 
-    // not needed with using firebase
-    moviePosters.push(button2);
+    // firebase update:
+    var movieObj = {
+        movieFromDb: button2
+    }
+    if (!movieArray.includes(button2)) {
+        database.ref().push(movieObj);
+    }
+    $("#search").val(" ");
+});
+
+$(document).keypress(function(event){
+    var keycode = (event.keyCode ? event.keyCode : event.which);
+    if(keycode == '13'){
+    event.preventDefault();
+
+    var button2 = $("#search").val().trim();
 
     // firebase update:
     var movieObj = {
         movieFromDb: button2
     }
-    database.ref().push(movieObj);
+    if (!movieArray.includes(button2)) {
+        database.ref().push(movieObj);
+      
+    }
+
     $("#search").val(" ");
+    }
 });
 
 // Runs like a for loop:
 database.ref().on("child_added", function (snapShot) {
     moviePoster(-1, snapShot.val().movieFromDb);
+    movieArray.push(snapShot.val().movieFromDb);
 })

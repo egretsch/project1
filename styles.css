@@ -9,14 +9,14 @@ body {
 }
 body h1 {
     font-family: 'Codystar', cursive;
-    font-size: 55px;
+    font-size: 65px;
     letter-spacing: 4px;
     text-align: center;
     margin-left: 20px;
     margin-top: 10px;
 }
 .btn {
-    background-color: #ffe500;
+    background-color: #ff5900;
 }
 .button {
     display: inline-block;
@@ -52,32 +52,47 @@ body h1 {
     -moz-animation: ripple .75s ease-out;
     animation: ripple .75s ease-out;
   }
+
 h2 {
     font-family: 'Work Sans', sans-serif;
     font-size: 30px;
 }
+
 #title {
     text-align: center;
 }   
+
 #funStuff {
     margin: 0 auto;
-}
+} 
+
 .carousel {
     float: left;
-    height: 450px;
-    width: 350px;   
+    width: 650px; 
+    margin-bottom: 200px;
+    background-size: 100% auto;  
 }
+
 iframe {
     float: right;
-    width: 350px;
+    height: 450px;
+    width: 450px;
+    margin-top: 100px;
 }
 input {
     background-color: #1B1B1B; 
 }
+
+input input[type=text]:focus {
+    border-bottom: 1px solid #000;
+    box-shadow: 0 1px 0 0 #000;
+  }
+
 .card-content { 
     height: 300px;
     width: 100%;
 }
+
 #card {
     width: 100%;
     -webkit-box-shadow: 0px 0px 15px 5px rgba(255, 255, 255, 0.95);
