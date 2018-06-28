@@ -25,9 +25,9 @@ const scopes = [
     'user-top-read'
 ];
 // If there is no token, redirect to Spotify authorization
-// if (!_token) {
-//     window.location = `${authEndpoint}?client_id=${clientId}&response_type=token&redirect_uri=${redirectUri}`;
-// }
+if (!_token) {
+    window.location = `${authEndpoint}?client_id=${clientId}&response_type=token&redirect_uri=${redirectUri}`;
+}
 
 var config = {
     apiKey: "AIzaSyB55nu5FoRbobBy05WCIFI5SJB1kksFaNE",
