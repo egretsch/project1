@@ -40,7 +40,7 @@ var config = {
 firebase.initializeApp(config);
 
 var database = firebase.database();
-
+// Creates the image he did for the movie poster and assigned the class and takes a random genre for each poster
 function moviePoster(index, movieFromDb) {
     // this is here because of the old implementation using the moviePosters array, not needed anymore with firebase update:
     if (index > 0) {
@@ -93,7 +93,7 @@ function moviePoster(index, movieFromDb) {
         });
     }
 }
-
+// On click the movie poster will create a I-frame player with a randomly generated playlist
 $(document).on("click", ".moviePoster", function () {
     $('#player').empty();
     var token = _token;
@@ -116,7 +116,7 @@ $(document).on("click", ".moviePoster", function () {
         }
     });
 });
-
+// On the click takes the movie entered into the user input box and moves it to an array which gives back the movie poster
 $("#sudMovie").on("click", function (event) {
     event.preventDefault();
     var button2 = $("#search").val().trim();
@@ -130,7 +130,7 @@ $("#sudMovie").on("click", function (event) {
     }
     $("#search").val(" ");
 });
-
+// Code that allows enter or click on submit to submit information to the database as well as the array
 $(document).keypress(function(event){
     var keycode = (event.keyCode ? event.keyCode : event.which);
     if(keycode == '13'){
