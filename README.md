@@ -15,7 +15,7 @@
   generated through spotify which allows the user to listen to the desired playlist.
   
 ## Instructions
-  Link:
+  Link: https://egretsch.github.io/project1/
   Click on link above. When you get to the page enter the name of the movie into the input field and click submit. 
   Once submitted click on the poster that you desire to listen to a randomly generated playlist that is based on the genre of that movie. 
   I frame player will appear and click play to listen to your curated music.
